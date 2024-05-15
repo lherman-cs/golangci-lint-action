@@ -87,8 +87,7 @@ export async function goInstall(versionConfig: VersionConfig): Promise<string> {
 
   const options: ExecOptions = { env: { ...process.env, CGO_ENABLED: "1" } }
 
-  const exres = await execShellCommand(
-    `go install github.com/golangci/golangci-lint/cmd/golangci-lint@${versionConfig.TargetVersion}`,
+  const exres = await execShellCommand(`go install github.com/golangci/golangci-lint/cmd/golangci-lint@${versionConfig.TargetVersion}`,
     options
   )
   printOutput(exres)
@@ -145,4 +144,11 @@ export async function installBin(versionConfig: VersionConfig): Promise<string> 
   core.info(`Installed golangci-lint into ${lintPath} in ${Date.now() - startedAt}ms`)
 
   return lintPath
+}
+
+export async function swapBin(path: string): Promise<string> {
+  let exres = await execShellCommand(`${path} custom`)
+  printOutput(exres)
+
+  return path.resolve(__dirname, 'custom-gcl')
 }

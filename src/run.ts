@@ -8,7 +8,7 @@ import { dir } from "tmp"
 import { promisify } from "util"
 
 import { restoreCache, saveCache } from "./cache"
-import { installLint, InstallMode } from "./install"
+import { installLint, InstallMode, swapBin } from "./install"
 import { alterDiffPatch } from "./utils/diffUtils"
 import { findLintVersion } from "./version"
 
@@ -22,9 +22,14 @@ function isOnlyNewIssues(): boolean {
 
 async function prepareLint(): Promise<string> {
   const mode = core.getInput("install-mode").toLowerCase()
+  const withModule = core.getBooleanInput("module-aware", { required: false })
   const versionConfig = await findLintVersion(<InstallMode>mode)
 
-  return await installLint(versionConfig, <InstallMode>mode)
+  const lintPath = await installLint(versionConfig, <InstallMode>mode)
+  if (withModule) {
+    return swapBin(lintPath)
+  }
+  return lintPath
 }
 
 async function fetchPatch(): Promise<string> {
