@@ -146,9 +146,9 @@ export async function installBin(versionConfig: VersionConfig): Promise<string> 
   return lintPath
 }
 
-export async function swapBin(lintpath: string): Promise<string> {
-  let exres = await execShellCommand(`${lintpath} custom`)
+export async function swapBin(lintPath: string, cwd: string): Promise<string> {
+  let exres = await execShellCommand(`${lintPath} custom`, { cwd })
   printOutput(exres)
 
-  return path.resolve(__dirname, 'custom-gcl')
+  return path.resolve(cwd, 'custom-gcl')
 }

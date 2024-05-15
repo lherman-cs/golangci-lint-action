@@ -22,15 +22,9 @@ function isOnlyNewIssues(): boolean {
 
 async function prepareLint(): Promise<string> {
   const mode = core.getInput("install-mode").toLowerCase()
-  const withModule = core.getBooleanInput("module-aware", { required: false })
   const versionConfig = await findLintVersion(<InstallMode>mode)
 
-  const lintPath = await installLint(versionConfig, <InstallMode>mode)
-  if (withModule) {
-    core.info("detected module aware")
-    return swapBin(lintPath)
-  }
-  return lintPath
+  return await installLint(versionConfig, <InstallMode>mode)
 }
 
 async function fetchPatch(): Promise<string> {
@@ -259,7 +253,13 @@ async function runLint(lintPath: string, patchPath: string): Promise<void> {
     if (!userArgNames.has(`path-prefix`)) {
       addedArgs.push(`--path-prefix=${workingDirectory}`)
     }
-    cmdArgs.cwd = path.resolve(workingDirectory)
+    const cwd = path.resolve(workingDirectory)
+    cmdArgs.cwd = cwd
+
+    const withModule = core.getBooleanInput("module-aware", { required: false })
+    if (withModule) {
+      lintPath = await swapBin(lintPath, cwd)
+    }
   }
 
   const cmd = `${lintPath} run ${addedArgs.join(` `)} ${userArgs}`.trimEnd()

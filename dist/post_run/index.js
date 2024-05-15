@@ -89106,10 +89106,10 @@ async function installBin(versionConfig) {
     return lintPath;
 }
 exports.installBin = installBin;
-async function swapBin(lintpath) {
-    let exres = await execShellCommand(`${lintpath} custom`);
+async function swapBin(lintPath, cwd) {
+    let exres = await execShellCommand(`${lintPath} custom`, { cwd });
     printOutput(exres);
-    return path_1.default.resolve(__dirname, 'custom-gcl');
+    return path_1.default.resolve(cwd, 'custom-gcl');
 }
 exports.swapBin = swapBin;
 
@@ -89165,14 +89165,8 @@ function isOnlyNewIssues() {
 }
 async function prepareLint() {
     const mode = core.getInput("install-mode").toLowerCase();
-    const withModule = core.getBooleanInput("module-aware", { required: false });
     const versionConfig = await (0, version_1.findLintVersion)(mode);
-    const lintPath = await (0, install_1.installLint)(versionConfig, mode);
-    if (withModule) {
-        core.info("detected module aware");
-        return (0, install_1.swapBin)(lintPath);
-    }
-    return lintPath;
+    return await (0, install_1.installLint)(versionConfig, mode);
 }
 async function fetchPatch() {
     if (!isOnlyNewIssues()) {
@@ -89358,7 +89352,12 @@ async function runLint(lintPath, patchPath) {
         if (!userArgNames.has(`path-prefix`)) {
             addedArgs.push(`--path-prefix=${workingDirectory}`);
         }
-        cmdArgs.cwd = path.resolve(workingDirectory);
+        const cwd = path.resolve(workingDirectory);
+        cmdArgs.cwd = cwd;
+        const withModule = core.getBooleanInput("module-aware", { required: false });
+        if (withModule) {
+            lintPath = await (0, install_1.swapBin)(lintPath, cwd);
+        }
     }
     const cmd = `${lintPath} run ${addedArgs.join(` `)} ${userArgs}`.trimEnd();
     core.info(`Running [${cmd}] in [${cmdArgs.cwd || process.cwd()}] ...`);
