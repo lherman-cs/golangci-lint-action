@@ -88990,7 +88990,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.installBin = exports.goInstall = exports.installLint = exports.InstallMode = void 0;
+exports.swapBin = exports.installBin = exports.goInstall = exports.installLint = exports.InstallMode = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const tc = __importStar(__nccwpck_require__(7784));
 const child_process_1 = __nccwpck_require__(2081);
@@ -89106,6 +89106,12 @@ async function installBin(versionConfig) {
     return lintPath;
 }
 exports.installBin = installBin;
+async function swapBin(lintpath) {
+    let exres = await execShellCommand(`${lintpath} custom`);
+    printOutput(exres);
+    return path_1.default.resolve(__dirname, 'custom-gcl');
+}
+exports.swapBin = swapBin;
 
 
 /***/ }),
@@ -89159,8 +89165,14 @@ function isOnlyNewIssues() {
 }
 async function prepareLint() {
     const mode = core.getInput("install-mode").toLowerCase();
+    const withModule = core.getBooleanInput("module-aware", { required: false });
     const versionConfig = await (0, version_1.findLintVersion)(mode);
-    return await (0, install_1.installLint)(versionConfig, mode);
+    const lintPath = await (0, install_1.installLint)(versionConfig, mode);
+    if (withModule) {
+        core.info("detected module aware");
+        return (0, install_1.swapBin)(lintPath);
+    }
+    return lintPath;
 }
 async function fetchPatch() {
     if (!isOnlyNewIssues()) {
