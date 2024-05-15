@@ -27,6 +27,7 @@ async function prepareLint(): Promise<string> {
 
   const lintPath = await installLint(versionConfig, <InstallMode>mode)
   if (withModule) {
+    core.info("detected module aware")
     return swapBin(lintPath)
   }
   return lintPath
