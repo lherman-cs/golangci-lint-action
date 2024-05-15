@@ -13,6 +13,10 @@ inputs:
     description: "The mode to install golangci-lint. It can be 'binary' or 'goinstall'."
     default: "binary"
     required: false
+  module-aware:
+    description: "Recompile golangci-lint with custom modules"
+    default: true
+    required: false
   working-directory:
     description: "golangci-lint working directory, default is project root"
     required: false
