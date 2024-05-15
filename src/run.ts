@@ -253,13 +253,13 @@ async function runLint(lintPath: string, patchPath: string): Promise<void> {
     if (!userArgNames.has(`path-prefix`)) {
       addedArgs.push(`--path-prefix=${workingDirectory}`)
     }
-    const cwd = path.resolve(workingDirectory)
-    cmdArgs.cwd = cwd
+    cmdArgs.cwd = path.resolve(workingDirectory)
+  }
 
-    const withModule = core.getBooleanInput("module-aware", { required: false })
-    if (withModule) {
-      lintPath = await swapBin(lintPath, cwd)
-    }
+  const withModule = core.getBooleanInput("module-aware", { required: false })
+  if (withModule) {
+    const cwd = (cmdArgs.cwd && cmdArgs.cwd.toString()) || process.cwd()
+    lintPath = await swapBin(lintPath, cwd)
   }
 
   const cmd = `${lintPath} run ${addedArgs.join(` `)} ${userArgs}`.trimEnd()
