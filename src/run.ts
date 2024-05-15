@@ -257,6 +257,7 @@ async function runLint(lintPath: string, patchPath: string): Promise<void> {
   }
 
   const withModule = core.getBooleanInput("module-aware", { required: false })
+  core.info(`with-module is ${withModule}`)
   if (withModule) {
     const cwd = (cmdArgs.cwd && cmdArgs.cwd.toString()) || process.cwd()
     lintPath = await swapBin(lintPath, cwd)

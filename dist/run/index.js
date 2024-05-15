@@ -89352,12 +89352,13 @@ async function runLint(lintPath, patchPath) {
         if (!userArgNames.has(`path-prefix`)) {
             addedArgs.push(`--path-prefix=${workingDirectory}`);
         }
-        const cwd = path.resolve(workingDirectory);
-        cmdArgs.cwd = cwd;
-        const withModule = core.getBooleanInput("module-aware", { required: false });
-        if (withModule) {
-            lintPath = await (0, install_1.swapBin)(lintPath, cwd);
-        }
+        cmdArgs.cwd = path.resolve(workingDirectory);
+    }
+    const withModule = core.getBooleanInput("module-aware", { required: false });
+    core.info(`with-module is ${withModule}`);
+    if (withModule) {
+        const cwd = (cmdArgs.cwd && cmdArgs.cwd.toString()) || process.cwd();
+        lintPath = await (0, install_1.swapBin)(lintPath, cwd);
     }
     const cmd = `${lintPath} run ${addedArgs.join(` `)} ${userArgs}`.trimEnd();
     core.info(`Running [${cmd}] in [${cmdArgs.cwd || process.cwd()}] ...`);
